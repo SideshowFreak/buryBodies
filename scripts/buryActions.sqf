@@ -1,4 +1,4 @@
-private ["_action","_backPackMag","_backPackWpn","_box","_corpse","_cross","_gain","_humanity","_humanityAmount","_isBury","_grave","_name","_backPack","_position","_sound"];
+private ["_action","_backPackMag","_backPackWpn","_box","_corpse","_cross","_gain","_humanity","_humanityAmount","_isBury","_grave","_name","_backPack","_position","_sound","_crosstype"];
 
 if (dayz_actionInProgress) exitWith {"You are already performing an action, wait for the current action to finish." call dayz_rollingMessages;};
 dayz_actionInProgress = true;
@@ -26,16 +26,24 @@ _box setposATL [(_position select 0)+1,(_position select 1)+1.5,_position select
 _box setVariable ["permaLoot",true,true];
 _box setVariable ["bury",true,true];
 
-_grave = createVehicle ["Grave",_position,[],0,"CAN_COLLIDE"];
-_grave setposATL [(_position select 0)+1,_position select 1,_position select 2];
-_grave setVariable ["bury",true,true];
-
+if (_isBury) then {
+	_grave = createVehicle ["Grave",_position,[],0,"CAN_COLLIDE"];
+	_grave setposATL [(_position select 0)+1,_position select 1,_position select 2];
+	_grave setVariable ["bury",true,true];
+} else {
+	_grave = createVehicle ["Body",_position,[],0,"CAN_COLLIDE"];
+	_grave setposATL [(_position select 0)+1,_position select 1,_position select 2];
+	_grave setVariable ["bury",true,true];
+};
 if (_isBury) then {
 	_name = _corpse getVariable["bodyName","unknown"];
-	_cross = createVehicle ["GraveCross1",_position,[],0,"CAN_COLLIDE"];
+	_crosstype = ["GraveCross1","GraveCross2","GraveCrossHelmet"]  call BIS_fnc_selectRandom;
+	_cross = createVehicle [_crosstype, _position, [], 0, "CAN_COLLIDE"];
 	_cross setposATL [(_position select 0)+1,(_position select 1)-1.2,_position select 2];
 	_cross setVariable ["bury",true,true];
 };
+
+
 
 clearWeaponCargoGlobal _box;
 clearMagazineCargoGlobal _box;
@@ -70,6 +78,8 @@ if (_isBury) then {
 	} else {
 		"Rest in peace, unknown soldier...." call dayz_rollingMessages;
 	};
+} else {
+"You Feel Your Humanity Lower as You Gut this Poor Bastard" call dayz_rollingMessages;
 };
 
 _humanity = player getVariable ["humanity",0];
